@@ -5,149 +5,170 @@ from bazis import bazis
 from functions import *
 # from M_num import M
 
-
-print(f"Количество переменных3")
-n=int(input())
-print("Введите количество условий")
-m=int(input())
-if (m<=n):
-    usl=[[0 for j in range(n) ]for j in range(m)]
-    znaki=[]
-    bi=[]
-    ci=[]
-    bp=[]
-    zj=[]
-    func=[]
-    dj=[]
-    print("Коефициенты переменных в целевой фукнции")
-    for i in range(n):
-        print(f"Введите коефициент при переменной x{i+1}")
-        func.append(value(int(input()),i))
-    for i in range(m):
-        for j in range(n):
-            print(f"Коефициент при переменной x{j+1} {i+1}-го условия ")
-            usl[i][j]=value(int(input()),j)            
-    for i in range(m):
-        print(f"Введите знак <= или >= {i+1}-го условия") 
-        znaki.append(str(input())) 
-        print(f"Введите знак константу, стоящее после знака {i+1}-го условия") 
-
-        bi.append(value(int(input()),-1))
-    # print(bi)    
-
-# Вычисляем
-    M_or_no=bazis(usl,znaki,func)       
-    print(func)         
-    print2(usl)
-    bazis_per(func,usl,ci,bp)
-    s=M(0,0)
-    for i in range(len(usl[0])):
-        for j in range(len(usl)): 
-            # print(ci[j])
-            s2=M(usl[j][i].get_const(),0)
-            s=s+ci[j]*s2  #M(usl[j][i].get_const(),0)   
-        zj.append(s)
-        s=M(0,0) 
-    print(f"zj = {zj}")  
-    
-    for i in range(len(zj)):
-        # print(type(func[i]))
-        if type(func[i])!=value1:
-            dj.append(M(func[i].get_const(),0)-zj[i])
-        else:
-            dj.append(func[i].get_m()-zj[i])    
-    print(f"dj = {dj}")
-    
-
-# Находим разрешающий столбец
-    while (ocenka(dj)>=0):
-        print("============================================================================================================")
-        zj.clear() 
-        r=ocenka(dj)
-        dj.clear()
-        if r>=0: print(f"r = {r+1}")
-        else: print(f"Решено, bp = {bp}") 
-    # Находим разрешающую строку
-        br1=[]
-        for i in range(len(usl)):
-            l=bi[i]/usl[i][r]
-            br1.append(l)
-        print(f"br1 = {br1}") 
-        s=min(br1)
-        br1.clear()
-        print(f"s = {s}") 
-
-    # Новые базисные перемнные
-        for i in range(len(usl[s])): usl[s][i].baz=False
-        usl[s][r].baz=True
-        bp[s]=usl[s][r].get_per()
-        print(f"bp = {bp}")
-    # Новые коефициенты базисных переменных    
-        ci.clear()
-        for i in bp:
-            for j in func:
-                if i==j.get_per():
-                    if type(j)==value1:
-                        ci.append(j.get_m()) 
-                    else: ci.append(M(j.get_const(),0))
-        print(f"ci = {ci}")            
-
-    # Преобразуем разрешающую строку 
-        mod=value(usl[s][r].get_const(),usl[s][r].get_index())
-        for i in range(len(usl[s])):
-            if usl[s][i].baz:
-                usl[s][i]=usl[s][i]/mod
-                usl[s][i].baz=True
-            else:    
-                usl[s][i]=usl[s][i]/mod
-        bi[s]=bi[s]/mod           
-
-    # Находим делители
-        k=[]      
-        for i in range(len(usl)):
-            k.append(usl[i][r]/usl[s][r])
-        print(f"k = {k}")
-        for i in range(len(usl[0])):
-            for j in range(len(usl)):
-                if j!=s:
-                    if usl[j][i].baz:
-                        usl[j][i]=usl[j][i]-usl[s][i]*k[j]
-                        usl[j][i].baz=True
-                    else: usl[j][i]=usl[j][i]-usl[s][i]*k[j]
-        for i in range(len(bi)):
-            if i!=s:
-                 bi[i]=bi[i]-bi[s]*k[i]
-        k.clear()         
-                
-        print(f"func = {func}")               
-        print2(usl) 
-        print(f"bi = {bi}")
-
-        x=M(0,0)
-        for i in range(len(usl[0])):
-            for j in range(len(usl)):
-                if type(ci[j])!=M:
-                    x=x+M(ci[j].b(),0)*M(usl[j][i].get_const(),0)
+class simplex:
+    def __init__(self,func1:list,usl1:list,dimension,m1):
+        self.n=dimension
+        self.m=m1
+        self.func=[]
+        self.usl=[]
+        self.bi=[]
+        self.znaki=[]
+        mas=[]
+        for i in range(dimension):
+            self.func.append(value(float(func1[i]),i))
+        for i in range(self.m):
+            for j in range(dimension+1):
+                if type(usl1[i][j])!=str:
+                    mas.append(value(float(usl1[i][j]),j))
                 else:
-                    x=x+ci[j]*M(usl[j][i].get_const(),0)    
-            zj.append(x)
-            x=M(0,0)
-            s=M(0,0) 
-        print(f"zj = {zj}")  
-        
-        for i in range(len(zj)):
-            # print(type(func[i]))
-            if type(func[i])!=value1:
-                dj.append(M(func[i].get_const(),0)-zj[i])
-            else:
-                dj.append(func[i].get_m()-zj[i])    
-        print(f"dj = {dj}") 
-
-    print("=============================================================================")
-    print("=============================================================================")
-    print("ОПТИМАЛЬНОЕ РЕШЕНИЕ:")
-    for i in range(len(bi)):
-        print(f"{bp[i]} = {bi[i]}")
+                    self.znaki.append(usl1[i][j]);    
+            self.usl.append(mas.copy())
+            mas.clear() 
+        for i in range(self.m):
+            self.bi.append(value(float(usl1[i][-1]),-1))
 
 
+        if (self.m<=self.n):
+            ci=[]
+            bp=[]
+            zj=[]
+            dj=[]
+        # Вычисляем
+            M_or_no=bazis(self.usl,self.znaki,self.func)       
+            # print(self.func)         
+            # print2(self.usl)
+            bazis_per(self.func,self.usl,ci,bp)
+            s=M(0,0)
+            for i in range(len(self.usl[0])):
+                for j in range(len(self.usl)): 
+                    s2=M(self.usl[j][i].get_const(),0)
+                    s=s+ci[j]*s2 
+                zj.append(s)
+                s=M(0,0) 
+            # print(f"zj = {zj}")  
+            
+            for i in range(len(zj)):
+                # print(type(func[i]))
+                if type(self.func[i])!=value1:
+                    dj.append(M(self.func[i].get_const(),0)-zj[i])
+                else:
+                    dj.append(self.func[i].get_m()-zj[i])    
+            # print(f"dj = {dj}")
+            
 
+        # Находим разрешающий столбец
+            while (ocenka(dj)>=0):
+                print("============================================================================================================")
+                zj.clear() 
+                r=ocenka(dj)
+                dj.clear()
+                if r>=0: print(f"r = {r+1}")
+                else: print(f"Решено, bp = {bp}") 
+            # Находим разрешающую строку
+                br1=[]
+                for i in range(len(self.usl)):
+                    l=self.bi[i]/self.usl[i][r]
+                    br1.append(l)
+                # print(f"br1 = {br1}") 
+                s=min(br1)
+                br1.clear()
+                print(f"s = {s+1}") 
+
+            # Новые базисные перемнные
+                for i in range(len(self.usl[s])): self.usl[s][i].baz=False
+                self.usl[s][r].baz=True
+                bp[s]=self.usl[s][r].get_per()
+                # print(f"bp = {bp}")
+
+            # Новые коефициенты базисных переменных    
+                ci.clear()
+                for i in bp:
+                    for j in self.func:
+                        if i==j.get_per():
+                            if type(j)==value1:
+                                ci.append(j.get_m()) 
+                            else: ci.append(M(j.get_const(),0))
+                # print(f"ci = {ci}")            
+
+            # Преобразуем разрешающую строку 
+                mod=value(self.usl[s][r].get_const(),self.usl[s][r].get_index())
+                for i in range(len(self.usl[s])):
+                    if self.usl[s][i].baz:
+                        self.usl[s][i]=self.usl[s][i]/mod
+                        self.usl[s][i].baz=True
+                    else:    
+                        self.usl[s][i]=self.usl[s][i]/mod
+                self.bi[s]=self.bi[s]/mod           
+
+            # Находим делители
+                k=[]      
+                for i in range(len(self.usl)):
+                    k.append(self.usl[i][r]/self.usl[s][r])
+                # print(f"k = {k}")
+                for i in range(len(self.usl[0])):
+                    for j in range(len(self.usl)):
+                        if j!=s:
+                            if self.usl[j][i].baz:
+                                self.usl[j][i]=self.usl[j][i]-self.usl[s][i]*k[j]
+                                self.usl[j][i].baz=True
+                            else: self.usl[j][i]=self.usl[j][i]-self.usl[s][i]*k[j]
+                for i in range(len(self.bi)):
+                    if i!=s:
+                        self.bi[i]=self.bi[i]-self.bi[s]*k[i]
+                k.clear()         
+                        
+                # print(f"func = {self.func}")               
+                # print2(self.usl) 
+                # print(f"bi = {self.bi}")
+
+                x=M(0,0)
+                for i in range(len(self.usl[0])):
+                    for j in range(len(self.usl)):
+                        if type(ci[j])!=M:
+                            x=x+M(ci[j].b(),0)*M(self.usl[j][i].get_const(),0)
+                        else:
+                            x=x+ci[j]*M(self.usl[j][i].get_const(),0)    
+                    zj.append(x)
+                    x=M(0,0)
+                    s=M(0,0) 
+                print(f"zj = {zj}")  
+                
+                for i in range(len(zj)):
+                    if type(self.func[i])!=value1:
+                        dj.append(M(self.func[i].get_const(),0)-zj[i])
+                    else:
+                        dj.append(self.func[i].get_m()-zj[i])    
+                print(f"dj = {dj}") 
+
+            print("=============================================================================")
+            print("=============================================================================")
+            # print("ОПТИМАЛЬНОЕ РЕШЕНИЕ:")
+            result=dict(zip(bp,self.bi))
+            mas.clear()
+            self.result={}
+            for i in range(self.n):
+                p="X"+str(i+1)
+                if p in result:
+                    # print(f'{p}={result[p]}')
+                    self.result[p]=result[p]
+                else:
+                    # print(f'{p}={0}')    
+                    self.result[p]=0
+    def get_result(self):
+        result=[]
+        keys=list(self.result.keys())    
+        for i in keys:
+            result.append(self.result[i])
+        return result    
+
+
+dimension=2
+m=2
+func=[1,-1]
+usl=[
+    [-1,2,'>=',4]
+    ,[3,2,'<=',14]
+]
+sim=simplex(func,usl,dimension,m)
+print(sim.result)
+print(sim.get_result())
