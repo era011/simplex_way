@@ -7,7 +7,7 @@ from functions import *
 
 class simplex:
     def __init__(self,func1:list,usl1:list):    #,dimension,m1):
-        self.n=len(func)
+        self.n=len(func1)
         self.m=len(usl1)
         self.func=[]
         self.usl=[]
@@ -172,7 +172,10 @@ class simplex:
                 self.resh=1                        
         print("=============================================================================")
         print("=============================================================================")
+        for i in range(len(self.bi)):
+            self.bi[i]=float(self.bi[i].c)
         self.result=dict(zip(self.bp,self.bi)) 
+        # for i in range
     def get_result(self):
         if self.resh==0:
             d={}
@@ -180,7 +183,7 @@ class simplex:
                 per="X"+str(i+1)
                 if per in self.result:
                     # d[per]=round((self.result[per]).c,3)
-                    d[per]=(self.result[per])
+                    d[per]=self.result[per]
                 else:
                     d[per]=0
             return d
@@ -345,18 +348,23 @@ class simplex:
 # ]
 # (0,0,29.77,8.9)
 
-func=[-3,2]
-usl=[
-    [-2,3,'>=',6]
-    ,[1,4,'<=',16]
-]
-(0,4)
+# func=[-3,2]
+# usl=[
+#     [-2,3,'>=',6]
+#     ,[1,4,'<=',16]
+# ]
+# (0,4)
 
 
 
 
-sim=simplex(func,usl)
-# print(sim.result)
-print(sim.get_result())
+# sim=simplex(func,usl)
+
+# print(sim.get_result())
+
+# a=3.14
+# b=int(3.14)
+
+# print(a-b)
 
 

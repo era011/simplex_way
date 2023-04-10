@@ -4,7 +4,7 @@ class value:
     baz=False
     def __init__(self,c,i):
         self.per="X"+str(i+1)
-        self.c=c
+        self.c=round(c,2)
     def __repr__(self):
         if self.per[len(self.get_per())-1:]!="0":
             if self.baz:
@@ -27,11 +27,11 @@ class value:
     def __mul__ (self,other):
         return  value(round(self.c*other.c,2),self.get_index()) 
     def __truediv__(self,other):
-        return value(round(self.c/other.c,2),self.get_index())
-        # if other.c!=0:
-        #     return value(self.c/other.c,self.get_index())
-        # else:
-        #     return value(float('inf'),self.get_index())
+        # return value(round(self.c/other.c,2),self.get_index())
+        if other.c!=0:
+            return value(self.c/other.c,self.get_index())
+        else:
+            return value(float('inf'),self.get_index())
     def __sub__ (self,other):
         return  value(round(self.c-other.c,2),self.get_index())              
 
